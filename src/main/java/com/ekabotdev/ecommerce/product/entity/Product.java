@@ -1,20 +1,21 @@
-package com.ekabotdev.ecommerce.product;
+package com.ekabotdev.ecommerce.product.entity;
 
 
-import com.ekabotdev.ecommerce.category.Category;
+import com.ekabotdev.ecommerce.category.entity.Category;
+import com.ekabotdev.ecommerce.common.entity.BaseEntity;
 import com.ekabotdev.ecommerce.product.enums.ProductStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "products")
 @Getter
 @Setter
-public class Product {
+public class Product extends BaseEntity {
 
 
     @Id
@@ -41,9 +42,4 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated-at", nullable = false)
-    private LocalDateTime updatedAt;
 }

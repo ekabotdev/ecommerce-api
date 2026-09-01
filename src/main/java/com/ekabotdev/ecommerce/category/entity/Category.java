@@ -1,16 +1,15 @@
-package com.ekabotdev.ecommerce.category;
+package com.ekabotdev.ecommerce.category.entity;
 
+import com.ekabotdev.ecommerce.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "categories")
 @Getter
 @Setter
-public class Category {
+public class Category  extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,10 +17,4 @@ public class Category {
 
     @Column(nullable = false, unique = true, length = 100)
     private String name;
-
-    @Column(name = "created_at",  nullable = false,updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at" , nullable = false)
-    private LocalDateTime updatedAt;
 }
