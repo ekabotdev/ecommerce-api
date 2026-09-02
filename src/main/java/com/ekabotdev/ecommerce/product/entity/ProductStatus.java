@@ -1,4 +1,4 @@
-package com.ekabotdev.ecommerce.product.enums;
+package com.ekabotdev.ecommerce.product.entity;
 
 public enum ProductStatus {
     ACTIVE,
