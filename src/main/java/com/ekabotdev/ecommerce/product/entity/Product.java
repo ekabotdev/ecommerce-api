@@ -42,4 +42,8 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @Version
+    @Column(nullable = false)
+    private Long version;
+
 }

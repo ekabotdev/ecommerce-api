@@ -4,13 +4,11 @@ package com.ekabotdev.ecommerce.common.exception;
 
 import com.ekabotdev.ecommerce.category.exception.CategoryAlreadyExistsException;
 import com.ekabotdev.ecommerce.category.exception.CategoryNotFoundException;
-import com.ekabotdev.ecommerce.product.exception.InsufficientStockException;
-import com.ekabotdev.ecommerce.product.exception.InvalidProductFilterException;
-import com.ekabotdev.ecommerce.product.exception.InvalidSortFieldException;
-import com.ekabotdev.ecommerce.product.exception.ProductNotFoundException;
+import com.ekabotdev.ecommerce.product.exception.*;
 import io.jsonwebtoken.security.PublicJwkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -116,6 +114,22 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 LocalDateTime.now()
         );
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiError> handleOptimisticLockingFailure(
+            ObjectOptimisticLockingFailureException exception
+    ) {
+
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "The product was modified by another request. Please try again.",
+                LocalDateTime.now()
+        );
+
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(error);
