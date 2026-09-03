@@ -4,6 +4,7 @@ package com.ekabotdev.ecommerce.common.exception;
 
 import com.ekabotdev.ecommerce.category.exception.CategoryAlreadyExistsException;
 import com.ekabotdev.ecommerce.category.exception.CategoryNotFoundException;
+import com.ekabotdev.ecommerce.product.exception.InsufficientStockException;
 import com.ekabotdev.ecommerce.product.exception.InvalidProductFilterException;
 import com.ekabotdev.ecommerce.product.exception.InvalidSortFieldException;
 import com.ekabotdev.ecommerce.product.exception.ProductNotFoundException;
@@ -105,6 +106,18 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<ApiError> handleInsufficientStockException
+            (InsufficientStockException exception) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
                 .body(error);
     }
 }

@@ -4,6 +4,7 @@ package com.ekabotdev.ecommerce.product.controller;
 import com.ekabotdev.ecommerce.product.dto.CreateProductRequest;
 import com.ekabotdev.ecommerce.product.dto.ProductResponse;
 import com.ekabotdev.ecommerce.product.dto.UpdateProductRequest;
+import com.ekabotdev.ecommerce.product.dto.UpdateStockRequest;
 import com.ekabotdev.ecommerce.product.enums.ProductStatus;
 import com.ekabotdev.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -83,5 +84,16 @@ public class ProductController {
     public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long id) {
       productService.deleteProduct(id);
       return ResponseEntity.noContent().build();
+    }
+
+
+    @PatchMapping("/{id}/stock")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProductResponse> updateStock
+            (@PathVariable Long id,
+             @Valid @RequestBody UpdateStockRequest request) {
+        return ResponseEntity.ok(
+                productService.updateStock(id, request)
+        );
     }
 }

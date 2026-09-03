@@ -7,8 +7,11 @@ import com.ekabotdev.ecommerce.category.repository.CategoryRepository;
 import com.ekabotdev.ecommerce.product.dto.CreateProductRequest;
 import com.ekabotdev.ecommerce.product.dto.ProductResponse;
 import com.ekabotdev.ecommerce.product.dto.UpdateProductRequest;
+import com.ekabotdev.ecommerce.product.dto.UpdateStockRequest;
 import com.ekabotdev.ecommerce.product.entity.Product;
+import com.ekabotdev.ecommerce.product.entity.StockOperation;
 import com.ekabotdev.ecommerce.product.enums.ProductStatus;
+import com.ekabotdev.ecommerce.product.exception.InsufficientStockException;
 import com.ekabotdev.ecommerce.product.exception.InvalidProductFilterException;
 import com.ekabotdev.ecommerce.product.exception.ProductNotFoundException;
 import com.ekabotdev.ecommerce.product.repository.ProductRepository;
@@ -162,5 +165,37 @@ public class ProductService {
                 -> new ProductNotFoundException("Product with  id " + id + " not found"));
 
         productRepository.delete(product);
+    }
+
+
+    @Transactional
+    public ProductResponse updateStock(Long id, UpdateStockRequest request) {
+
+        Product product = productRepository.findById(id).orElseThrow(()
+                -> new ProductNotFoundException("Product with  id " + id + " not found")
+        );
+        int currentStock = product.getStockQuantity();
+        int quantity = request.getQuantity();
+
+        if (request.getOperation() == StockOperation.INCREASE) {
+            product.setStockQuantity(currentStock + quantity);
+        }else {
+            if(quantity > currentStock) {
+                throw new InsufficientStockException("Cannot decrease stock by" + quantity +
+                        " Current stock is " + currentStock);
+            }
+            product.setStockQuantity(currentStock - quantity);
+        }
+        UpdateProductStatus(product);
+        return toResponse(product);
+
+    }
+
+    private void UpdateProductStatus(Product product) {
+        if (product.getStockQuantity() == 0) {
+            product.setStatus(ProductStatus.OUT_OF_STOCK);
+        }else {
+            product.setStatus(ProductStatus.ACTIVE);
+        }
     }
 }
