@@ -21,10 +21,11 @@ public class AuthenticationService {
     public String authenticate (LoginRequest loginRequest) {
 
         Authentication authenticated =
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                );
+             authenticationManager.authenticate(
+                     new UsernamePasswordAuthenticationToken
+                             (loginRequest.getEmail()
+                             , loginRequest.getPassword())
+             );
         return jwtService.generateToken(authenticated.getName());
     }
 }

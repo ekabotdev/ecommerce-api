@@ -4,7 +4,10 @@ package com.ekabotdev.ecommerce.common.exception;
 
 import com.ekabotdev.ecommerce.category.exception.CategoryAlreadyExistsException;
 import com.ekabotdev.ecommerce.category.exception.CategoryNotFoundException;
+import com.ekabotdev.ecommerce.product.exception.InvalidProductFilterException;
+import com.ekabotdev.ecommerce.product.exception.InvalidSortFieldException;
 import com.ekabotdev.ecommerce.product.exception.ProductNotFoundException;
+import io.jsonwebtoken.security.PublicJwkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -76,5 +79,32 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(error);
 
+    }
+
+    @ExceptionHandler(InvalidProductFilterException.class)
+    public ResponseEntity<ApiError> handleInvalidProductFilterException
+            (InvalidProductFilterException exception) {
+        ApiError error = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return  ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    @ExceptionHandler(InvalidSortFieldException.class)
+    public ResponseEntity<ApiError> handleInvalidSortFieldException
+            (InvalidSortFieldException exception) {
+        ApiError error = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
     }
 }
