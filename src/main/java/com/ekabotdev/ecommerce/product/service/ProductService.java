@@ -4,17 +4,17 @@ package com.ekabotdev.ecommerce.product.service;
 import com.ekabotdev.ecommerce.category.entity.Category;
 import com.ekabotdev.ecommerce.category.exception.CategoryNotFoundException;
 import com.ekabotdev.ecommerce.category.repository.CategoryRepository;
-import com.ekabotdev.ecommerce.product.dto.CreateProductRequest;
-import com.ekabotdev.ecommerce.product.dto.ProductResponse;
-import com.ekabotdev.ecommerce.product.dto.UpdateProductRequest;
-import com.ekabotdev.ecommerce.product.dto.UpdateStockRequest;
+import com.ekabotdev.ecommerce.product.dto.*;
 import com.ekabotdev.ecommerce.product.entity.Product;
-import com.ekabotdev.ecommerce.product.entity.StockOperation;
+import com.ekabotdev.ecommerce.product.entity.StockMovement;
+import com.ekabotdev.ecommerce.product.enums.StockMovementReason;
+import com.ekabotdev.ecommerce.product.enums.StockOperation;
 import com.ekabotdev.ecommerce.product.enums.ProductStatus;
 import com.ekabotdev.ecommerce.product.exception.InsufficientStockException;
 import com.ekabotdev.ecommerce.product.exception.InvalidProductFilterException;
 import com.ekabotdev.ecommerce.product.exception.ProductNotFoundException;
 import com.ekabotdev.ecommerce.product.repository.ProductRepository;
+import com.ekabotdev.ecommerce.product.repository.StockMovementRepository;
 import com.ekabotdev.ecommerce.product.specification.ProductPageableValidator;
 import com.ekabotdev.ecommerce.product.specification.ProductSpecification;
 import org.springframework.data.domain.Page;
@@ -24,16 +24,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final StockMovementRepository stockMovementRepository;
 
     public ProductService(ProductRepository productRepository,
-                          CategoryRepository categoryRepository) {
+                          CategoryRepository categoryRepository,
+                          StockMovementRepository stockMovementRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.stockMovementRepository = stockMovementRepository;
     }
 
     @Transactional
@@ -181,21 +185,54 @@ public class ProductService {
             product.setStockQuantity(currentStock + quantity);
         }else {
             if(quantity > currentStock) {
-                throw new InsufficientStockException("Cannot decrease stock by" + quantity +
+                throw new InsufficientStockException("Cannot decrease stock by " + quantity +
                         " Current stock is " + currentStock);
             }
             product.setStockQuantity(currentStock - quantity);
         }
         UpdateProductStatus(product);
+
+        StockMovement movement = new StockMovement();
+        movement.setProduct(product);
+        movement.setQuantity(quantity);
+        movement.setOperation(request.getOperation());
+        movement.setReason(
+                request.getOperation()  == StockOperation.INCREASE
+                ? StockMovementReason.RESTOCK
+                        : StockMovementReason.ADJUSTMENT
+        );
+        stockMovementRepository.save(movement);
+
         return toResponse(product);
 
     }
 
-    private void UpdateProductStatus(Product product) {
+    public void UpdateProductStatus(Product product) {
         if (product.getStockQuantity() == 0) {
             product.setStatus(ProductStatus.OUT_OF_STOCK);
         }else {
             product.setStatus(ProductStatus.ACTIVE);
         }
+
+    }
+    @Transactional(readOnly = true)
+    public Page<StockMovementResponse> getStockMovements(Long productId, Pageable pageable) {
+        productRepository.findById(productId)
+                .orElseThrow(() ->
+        new ProductNotFoundException("Product with id " + productId + " not found")
+                );
+
+
+        return stockMovementRepository
+                .findAllByProduct_Id(productId, pageable)
+                .map(movement -> new StockMovementResponse(
+                        movement.getId(),
+                        movement.getQuantity(),
+                        movement.getOperation(),
+                        movement.getReason(),
+                        movement.getCreatedAt()
+                ));
+
+
     }
 }

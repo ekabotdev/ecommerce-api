@@ -1,10 +1,7 @@
 package com.ekabotdev.ecommerce.product.controller;
 
 
-import com.ekabotdev.ecommerce.product.dto.CreateProductRequest;
-import com.ekabotdev.ecommerce.product.dto.ProductResponse;
-import com.ekabotdev.ecommerce.product.dto.UpdateProductRequest;
-import com.ekabotdev.ecommerce.product.dto.UpdateStockRequest;
+import com.ekabotdev.ecommerce.product.dto.*;
 import com.ekabotdev.ecommerce.product.enums.ProductStatus;
 import com.ekabotdev.ecommerce.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -16,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -94,6 +92,14 @@ public class ProductController {
              @Valid @RequestBody UpdateStockRequest request) {
         return ResponseEntity.ok(
                 productService.updateStock(id, request)
+        );
+    }
+
+    @GetMapping("/{id}/stock-movements")
+    public ResponseEntity<Page<StockMovementResponse>> getStockMovements(
+            @PathVariable Long id, Pageable pageable) {
+        return ResponseEntity.ok(
+                productService.getStockMovements(id, pageable)
         );
     }
 }

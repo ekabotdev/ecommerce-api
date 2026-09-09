@@ -1,6 +1,6 @@
-package com.ekabotdev.ecommerce.product.dto;
+package com.ekabotdev.ecommerce.order.dto;
 
-import com.ekabotdev.ecommerce.product.enums.StockOperation;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -8,11 +8,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UpdateStockRequest {
+public class OrderItemRequest {
+
+    @NotNull
+    private Long productId;
 
     @NotNull
     @Min(1)
     private Integer quantity;
 
-    private StockOperation operation;
+
 }

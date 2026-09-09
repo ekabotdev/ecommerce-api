@@ -1,4 +1,4 @@
-package com.ekabotdev.ecommerce.product.entity;
+package com.ekabotdev.ecommerce.product.enums;
 
 public enum StockOperation {
     INCREASE,
