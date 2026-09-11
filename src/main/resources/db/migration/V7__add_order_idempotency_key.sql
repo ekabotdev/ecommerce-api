@@ -1,5 +1,12 @@
 ALTER TABLE orders
-    ADD COLUMN idempotency_key VARCHAR(100) NOT NULL;
+    ADD COLUMN idempotency_key VARCHAR(100)  NULL;
+
+
+UPDATE orders
+SET orders.idempotency_key = CONCAT('legacy-',id);
+
+ALTER TABLE orders
+    MODIFY COLUMN idempotency_key VARCHAR(100) NOT NULL;
 
 ALTER TABLE orders
     ADD CONSTRAINT uk_order_user_idempotency_key

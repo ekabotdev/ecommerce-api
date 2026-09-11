@@ -20,6 +20,8 @@ import com.ekabotdev.ecommerce.product.repository.ProductRepository;
 import com.ekabotdev.ecommerce.product.repository.StockMovementRepository;
 import com.ekabotdev.ecommerce.user.entity.User;
 import com.ekabotdev.ecommerce.user.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -59,6 +61,7 @@ public class OrderService {
             String email,
             String idempotencyKey
     ) {
+        validateIdempotencyKey(idempotencyKey);
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
@@ -223,5 +226,42 @@ public class OrderService {
                 order.getCreatedAt(),
                 order.getUpdatedAt()
         );
+    }
+
+
+    private void validateIdempotencyKey(String idempotencyKey) {
+
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+            throw new InvalidOrderException(
+                    "idempotencyKey header is required"
+            );
+        }
+
+        if (idempotencyKey.length() > 100) {
+            throw new InvalidOrderException(
+                    "Idempotency key must not exceed 100 characters"
+            );
+        }
+    }
+
+
+    public Page<OrderResponse> getMyOrders(String email, Pageable pageable) {
+        User user = userRepository.findByEmail(email).orElseThrow(()
+                -> new UsernameNotFoundException("User not found"));
+
+        return orderRepository
+                .findAllByUser(user, pageable)
+                .map(this::toResponse);
+    }
+
+    public OrderResponse getOrderById(String email,Long id) {
+        User user = userRepository.findByEmail(email).orElseThrow(()
+                -> new UsernameNotFoundException("User not found"));
+
+        Order order = orderRepository.findByIdAndUser(id, user).orElseThrow(()
+               -> new InvalidOrderException("Order not found"));
+
+       return toResponse(order);
+
     }
 }

@@ -5,6 +5,8 @@ import com.ekabotdev.ecommerce.order.dto.CreateOrderRequest;
 import com.ekabotdev.ecommerce.order.dto.OrderResponse;
 import com.ekabotdev.ecommerce.order.service.OrderService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -38,5 +40,25 @@ public class OrderController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<OrderResponse>> getAllOrders
+            (Authentication authentication, Pageable pageable) {
+        return ResponseEntity
+                .ok(orderService.getMyOrders(
+                        authentication.getName(),
+                        pageable
+                ));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponse> getOrderById
+            (Authentication authentication, @PathVariable Long id){
+
+        return ResponseEntity
+                .ok(orderService.getOrderById
+                        (authentication.getName(), id)
+                );
     }
 }
