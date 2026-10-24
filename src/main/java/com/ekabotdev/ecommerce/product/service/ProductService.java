@@ -52,14 +52,14 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setStockQuantity(request.getQuantity());
         product.setStatus(
-                request.getQuantity() >0
+                request.getQuantity() > 0
                 ? ProductStatus.ACTIVE
                         : ProductStatus.OUT_OF_STOCK
         );
         product.setCategory(category);
-        Product savedProduct = productRepository.save(product);
-        return  toResponse(savedProduct);
 
+
+        return  toResponse(product);
     }
     public ProductResponse toResponse(Product product) {
         return new ProductResponse(

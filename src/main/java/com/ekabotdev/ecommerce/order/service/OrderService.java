@@ -8,6 +8,7 @@ import com.ekabotdev.ecommerce.order.entity.Order;
 import com.ekabotdev.ecommerce.order.entity.OrderItem;
 import com.ekabotdev.ecommerce.order.enums.OrderStatus;
 import com.ekabotdev.ecommerce.order.exception.InvalidOrderException;
+import com.ekabotdev.ecommerce.order.exception.OrderCancellationException;
 import com.ekabotdev.ecommerce.order.repository.OrderItemRepository;
 import com.ekabotdev.ecommerce.order.repository.OrderRepository;
 import com.ekabotdev.ecommerce.product.entity.Product;
@@ -263,5 +264,43 @@ public class OrderService {
 
        return toResponse(order);
 
+    }
+
+    @Transactional
+    public OrderResponse cancelOrder(Long orderId, String email)
+    {
+        User user = userRepository.findByEmail(email).orElseThrow(()
+                ->  new UsernameNotFoundException("User not found"));
+
+
+        Order order = orderRepository.findByIdAndUser(orderId,user).orElseThrow(()
+                -> new InvalidOrderException("Order not found"));
+
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new OrderCancellationException("Order has already been cancelled");
+        }
+
+        List<OrderItem> items = orderItemRepository.findAllByOrderId(orderId);
+
+        for (OrderItem item : items) {
+
+            Product product = item.getProduct();
+
+            product.setStockQuantity(product.getStockQuantity() + item.getQuantity()
+            );
+            updateProductStatus(product);
+
+            StockMovement movement = new StockMovement();
+            movement.setProduct(product);
+            movement.setQuantity(item.getQuantity());
+            movement.setOperation(StockOperation.INCREASE);
+            movement.setReason(StockMovementReason.RETURN);
+
+            stockMovementRepository.save(movement);
+
+
+        }
+        order.setStatus(OrderStatus.CANCELLED);
+        return toResponse(order);
     }
 }

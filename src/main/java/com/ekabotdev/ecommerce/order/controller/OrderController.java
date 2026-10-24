@@ -61,4 +61,12 @@ public class OrderController {
                         (authentication.getName(), id)
                 );
     }
+
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<OrderResponse> cancelOrder
+            (Authentication authentication, @PathVariable Long id){
+        return ResponseEntity
+                .ok(orderService.cancelOrder(id,authentication.getName()));
+    }
 }

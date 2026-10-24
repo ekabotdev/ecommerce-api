@@ -4,6 +4,7 @@ package com.ekabotdev.ecommerce.common.exception;
 
 import com.ekabotdev.ecommerce.category.exception.CategoryAlreadyExistsException;
 import com.ekabotdev.ecommerce.category.exception.CategoryNotFoundException;
+import com.ekabotdev.ecommerce.order.exception.OrderCancellationException;
 import com.ekabotdev.ecommerce.product.exception.*;
 import io.jsonwebtoken.security.PublicJwkBuilder;
 import org.springframework.http.HttpStatus;
@@ -130,6 +131,19 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
 
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+    @ExceptionHandler(OrderCancellationException.class)
+    public ResponseEntity<ApiError>  handleOrderCancellationException
+            (OrderCancellationException exception) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(error);
