@@ -13,6 +13,7 @@ import com.ekabotdev.ecommerce.order.repository.OrderItemRepository;
 import com.ekabotdev.ecommerce.order.repository.OrderRepository;
 import com.ekabotdev.ecommerce.product.entity.Product;
 import com.ekabotdev.ecommerce.product.entity.StockMovement;
+import com.ekabotdev.ecommerce.product.enums.ProductStatus;
 import com.ekabotdev.ecommerce.product.enums.StockMovementReason;
 import com.ekabotdev.ecommerce.product.enums.StockOperation;
 import com.ekabotdev.ecommerce.product.exception.InsufficientStockException;
@@ -21,6 +22,7 @@ import com.ekabotdev.ecommerce.product.repository.ProductRepository;
 import com.ekabotdev.ecommerce.product.repository.StockMovementRepository;
 import com.ekabotdev.ecommerce.user.entity.User;
 import com.ekabotdev.ecommerce.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -41,20 +44,6 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final StockMovementRepository stockMovementRepository;
     private final UserRepository userRepository;
-
-    public OrderService(
-            OrderRepository orderRepository,
-            OrderItemRepository orderItemRepository,
-            ProductRepository productRepository,
-            StockMovementRepository stockMovementRepository,
-            UserRepository userRepository
-    ) {
-        this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
-        this.productRepository = productRepository;
-        this.stockMovementRepository = stockMovementRepository;
-        this.userRepository = userRepository;
-    }
 
     @Transactional
     public OrderResponse createOrder(
@@ -180,11 +169,11 @@ public class OrderService {
 
         if (product.getStockQuantity() == 0) {
             product.setStatus(
-                    com.ekabotdev.ecommerce.product.enums.ProductStatus.OUT_OF_STOCK
+                   ProductStatus.OUT_OF_STOCK
             );
         } else {
             product.setStatus(
-                    com.ekabotdev.ecommerce.product.enums.ProductStatus.ACTIVE
+                    ProductStatus.ACTIVE
             );
         }
     }

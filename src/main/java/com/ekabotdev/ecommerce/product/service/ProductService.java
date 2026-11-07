@@ -58,8 +58,9 @@ public class ProductService {
         );
         product.setCategory(category);
 
+        Product savedProduct = productRepository.save(product);
+        return  toResponse(savedProduct);
 
-        return  toResponse(product);
     }
     public ProductResponse toResponse(Product product) {
         return new ProductResponse(
